@@ -3,6 +3,8 @@
 // Aythor: 	Myroslav Zyblikevych
 // Date: 12/06/2018
 
+//ficha2
+
 #pragma once
 #include <cstdlib>
 
