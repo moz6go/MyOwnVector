@@ -3,12 +3,6 @@
 // Aythor: 	Myroslav Zyblikevych
 // Date: 12/06/2018
 
-//Ficha 1
-//ficha2
-//ficha3
-
-
-
 
 #pragma once
 #include <cstdlib>
