@@ -180,7 +180,7 @@ template<class Ttype>
 void my_vector<Ttype>::resize(size_t num) {
 	if (num > size()) {
 		for (size_t i = 0; i < num - size() + i; ++i) {
-			PushBack(Ttype());
+			push_back(Ttype());
 		}
 	}
 	else {

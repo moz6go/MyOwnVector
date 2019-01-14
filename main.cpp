@@ -1,7 +1,7 @@
 #include <iostream>
 #include <vector>
-#include <math.h>
-#include <time.h>
+#include <cmath>
+#include <ctime>
 #include <algorithm>
 #include "MyVector.h"
 using namespace std;
@@ -30,30 +30,6 @@ void print(Conteiner& c) {
 
 
 int main() {
-	
-	cout << "My vector push_back time test:" << endl;
-	for (int c = 0; c < 5; ++c) {
-		unsigned s = clock();
-		my_vector<int> v;
-		v.reserve(600000000);
-		for (int i = 0; i < 600000000; ++i) {
-			v.push_back(i);
-		}
-		unsigned f = clock();
-		cout << (double)(f - s) / 1000 << endl;
-	}
-
-	cout << "STL vector push_back time test:" << endl;
-	for (int c = 0; c < 5; ++c) {
-		unsigned s = clock();
-		vector<int> v;
-		v.reserve(600000000);
-		for (int i = 0; i < 600000000; ++i) {
-			v.push_back(i);
-		}
-		unsigned f = clock();
-		cout << (double)(f - s) / 1000 << endl;
-	}
 	system("pause");
 	return 0;
 }
