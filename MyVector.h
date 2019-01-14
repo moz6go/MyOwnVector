@@ -1,5 +1,5 @@
 // My Own Vector
-// Class: 	MyVector
+// Class: 	my_vector
 // Author: 	Myroslav Zyblikevych
 // Date: 12/06/2018
 
@@ -7,91 +7,84 @@
 #include <cstdlib>
 
 template <class Ttype>
-class MyVector {
+class my_vector {
 	const float COEFF_CAPACITY = 1.5;
 	Ttype* lbound_;
 	Ttype* ubound_;
 	Ttype* end_;
-
-	size_t size_;
-	size_t capacity_;
-
-	void CopyElements(const MyVector& source);
-	void Allocate(const size_t new_capacity);
-	void Deallocate();
-	void DefaultReserve();
+	//methods for alloc
+	void copy_elements(const my_vector& source);
+	void allocate(const size_t new_capacity);
+	void deallocate();
+	void default_reserve();
 public:
-	class MyIterator;
-	MyVector();
-	MyVector(const MyVector &vec);
-	MyVector(size_t s, Ttype element = Ttype());
-	Ttype At(const size_t pos) const;
-	Ttype Front() const;
-	Ttype Back() const;
-	MyIterator begin() { return lbound_; }
-	MyIterator end() { return ubound_; }
-	void RandIntInit(int RandRange);
-	void RandIntInit(int LRandRange, int URandRange);
-	size_t Size() const;
-	size_t Capacity() const;
-	void Reserve(size_t num);
-	void Resize(size_t num);
-	void ShrinkToFit();
-	bool Empty() const;
-	void Clear();
-	void Erase(size_t pos);
-	void Erase(size_t pos1, size_t pos2);
-	void Insert(size_t pos, Ttype element);
-	void Insert(size_t pos, MyVector &vec);
-	void PushBack(Ttype element);
-	void PushBack(MyVector &vec);
-	void Swap(MyVector &vec);
-	void PopBack() { --size_; }
+	class my_iterator;
+	my_vector();
+	my_vector(const my_vector &vec);
+	my_vector(size_t s, Ttype element = Ttype());
+	Ttype at(const size_t pos) const;
+	Ttype front() const;
+	Ttype back() const;
+	my_iterator begin();
+	my_iterator end();
+	size_t size() const;
+	size_t capacity() const;
+	void reserve(size_t num);
+	void resize(size_t num);
+	void shrink_to_fit();
+	bool empty() const;
+	void clear();
+	my_iterator erase(my_iterator pos);
+	my_iterator erase(my_iterator pos1, my_iterator pos2);
+	my_iterator insert(my_iterator pos, Ttype element);
+	my_iterator insert(my_iterator pos, my_iterator first, my_iterator last);
+	void push_back(Ttype element);
+	void swap(my_vector &vec);
+	void pop_back();
 	Ttype& operator[](const size_t i);
-	MyVector& operator=(const MyVector &vec);
-	bool operator ==(MyVector &vec);
-	bool operator !=(MyVector &vec) { return !(*this == vec); }
-	bool operator >(MyVector &vec) { return size_ > vec.Size(); }
-	bool operator <(MyVector &vec) { return size_ < vec.Size(); }
-	bool operator >=(MyVector &vec) { return size_ >= vec.Size(); }
-	bool operator <=(MyVector &vec) { return size_ <= vec.Size(); }
-	~MyVector();
-	class MyIterator
+	my_vector& operator=(const my_vector &vec);
+	bool operator ==(my_vector &vec);
+	bool operator !=(my_vector &vec);
+	bool operator >(my_vector &vec);
+	bool operator <(my_vector &vec);
+	bool operator >=(my_vector &vec);
+	bool operator <=(my_vector &vec);
+	~my_vector();
+	class my_iterator
 	{
-		Ttype* ptr;
+		Ttype* ptr_;
 	public:
-		MyIterator() { ptr = nullptr; }
-		MyIterator(Ttype* num) : ptr(num) {}
-		~MyIterator() { if (ptr != nullptr) delete[] ptr; }
-		Ttype& operator ++() { return *(ptr++); }
-		Ttype& operator --() { return *(ptr--); }
-		Ttype& operator ++(int) { return *(++ptr); }
-		Ttype& operator --(int) { return *(--ptr); }
-		Ttype& operator +(int num) { return *ptr + num; }
-		Ttype& operator -(int num) { return *ptr - num; }
-		Ttype& operator *() { return *ptr; }
-		bool operator ==(MyIterator itr) { return itr.ptr == ptr; }
-		bool operator !=(MyIterator itr) { return itr.ptr != ptr; }
+		my_iterator(Ttype* ptr = nullptr) : ptr_(ptr) {}
+		Ttype* operator++();
+		Ttype* operator--();
+		Ttype* operator+(size_t num);
+		Ttype* operator-(size_t num);
+		ptrdiff_t operator-(my_iterator rh_itr);
+		Ttype& operator* ();
+		bool operator==(my_iterator itr);
+		bool operator!=(my_iterator itr);
+		bool operator<(my_iterator itr);
 	};
 };
 
+//Privat methods for alloc
 template <class Ttype>
-void MyVector<Ttype>::CopyElements(const MyVector &source) {
-	for (size_t i = 0; i < source.Size(); ++i) {
+void my_vector<Ttype>::copy_elements(const my_vector &source) {
+	for (size_t i = 0; i < source.size(); ++i) {
 		lbound_[i] = source.lbound_[i];
 	}
-	ubound_ = lbound_ + source.Size();
+	ubound_ = lbound_ + source.size();
 }
 
 template <class Ttype>
-void MyVector<Ttype>::Allocate(const size_t new_capacity) {
-	Deallocate();
-	lbound_ = new Ttype[new_capacity];
+void my_vector<Ttype>::allocate(const size_t new_capacity) {
+	deallocate();
+	lbound_ = ubound_ = new Ttype[new_capacity];
 	end_ = lbound_ + new_capacity;
 }
 
 template <class Ttype>
-void MyVector<Ttype>::Deallocate() {
+void my_vector<Ttype>::deallocate() {
 	if (lbound_) {
 		delete[] lbound_;
 		lbound_ = ubound_ = end_ = nullptr;
@@ -99,35 +92,35 @@ void MyVector<Ttype>::Deallocate() {
 }
 
 template <class Ttype>
-void MyVector<Ttype>::DefaultReserve() {
-	MyVector tmp(*this);
-	Allocate((size_t)(Capacity() * COEFF_CAPACITY) <= 1 ? 2 : (size_t)(Capacity() * COEFF_CAPACITY));
-	CopyElements(tmp);
+void my_vector<Ttype>::default_reserve() {
+	if (capacity()) {
+		my_vector tmp(*this);
+		allocate(capacity() == 1 ? 2 : (size_t)(capacity() * COEFF_CAPACITY));
+		copy_elements(tmp);
+	}
+	else {
+		allocate(2);
+	}
 }
 
-//--------Methods-----------------------------
-
+//Methods implementation
 template <class Ttype>
-MyVector<Ttype>::MyVector()
-{
+my_vector<Ttype>::my_vector() {
 	lbound_ = ubound_ = end_ = nullptr;
 }
 
 template <class Ttype>
-MyVector<Ttype>::MyVector(const MyVector &vec) {
-	if (Capacity() < vec.Size()) {
-		Allocate(vec.Capacity());
-	}
-	CopyElements(vec);
+my_vector<Ttype>::my_vector(const my_vector &vec) {
+	allocate(vec.capacity());
+	copy_elements(vec);
 }
 
 template <class Ttype>
-MyVector<Ttype>::MyVector(size_t s, Ttype element) {
+my_vector<Ttype>::my_vector(size_t s, Ttype element) {
 	if (s) {
-		Allocate((size_t)(s * COEFF_CAPACITY));
+		allocate((size_t)(s * COEFF_CAPACITY));
 		ubound_ = lbound_ + s;
-		for (int i = 0; i < Size(); ++i)
-		{
+		for (size_t i = 0; i < size(); ++i) 		{
 			lbound_[i] = element;
 		}
 	}
@@ -137,60 +130,56 @@ MyVector<Ttype>::MyVector(size_t s, Ttype element) {
 }
 
 template <class Ttype>
-Ttype MyVector<Ttype>::At(const size_t pos) const {
-	if (pos > Size()) {
+Ttype my_vector<Ttype>::at(const size_t pos) const {
+	if (pos > size()) {
 		throw std::out_of_range("Out of Range!!!");
 	}
 	return lbound_[pos];
 }
 
 template<class Ttype>
-inline Ttype MyVector<Ttype>::Front() const {
+inline Ttype my_vector<Ttype>::front() const {
 	return lbound_ ? *lbound_ : 0;
 }
 
 template<class Ttype>
-inline Ttype MyVector<Ttype>::Back() const {
-	return lbound_ ? lbound_[Size() - 1] : 0;
-}
-
-template <class Ttype>
-void MyVector<Ttype>::RandIntInit(int RandRange) {
-	for (int i = 0; i < Size(); ++i) {
-		lbound_[i] = rand() % RandRange;
-	}
-}
-
-template <class Ttype>
-void MyVector<Ttype>::RandIntInit(int LRandRange, int URandRange) {
-	for (int i = 0; i < Size(); ++i) {
-		lbound_[i] = rand() % (URandRange - LRandRange) + LRandRange;
-	}
+inline Ttype my_vector<Ttype>::back() const {
+	return lbound_ ? lbound_[size() - 1] : 0;
 }
 
 template<class Ttype>
-inline size_t MyVector<Ttype>::Size() const {
+inline my_vector<Ttype>::template my_iterator my_vector<Ttype>::begin() {
+	return lbound_;
+}
+
+template<class Ttype>
+inline  my_vector<Ttype>::template my_iterator my_vector<Ttype>::end() {
+	return ubound_;
+}
+
+template<class Ttype>
+inline size_t my_vector<Ttype>::size() const {
 	return ubound_ - lbound_;
 }
 
 template<class Ttype>
-inline size_t MyVector<Ttype>::Capacity() const {
+inline size_t my_vector<Ttype>::capacity() const {
 	return end_ - lbound_;
 }
 
 template<class Ttype>
-void MyVector<Ttype>::Reserve(size_t num) {
-	if (num > Capacity()) {
-		MyVector tmp(*this);
-		Allocate(num);
-		CopyElements(tmp);
+void my_vector<Ttype>::reserve(size_t num) {
+	if (num > capacity()) {
+		my_vector tmp(*this);
+		allocate(num);
+		copy_elements(tmp);
 	}
 }
 
 template<class Ttype>
-void MyVector<Ttype>::Resize(size_t num) {
-	if (num > Size()) {
-		for (size_t i = 0; i < num - Size() + i; ++i) {
+void my_vector<Ttype>::resize(size_t num) {
+	if (num > size()) {
+		for (size_t i = 0; i < num - size() + i; ++i) {
 			PushBack(Ttype());
 		}
 	}
@@ -200,156 +189,229 @@ void MyVector<Ttype>::Resize(size_t num) {
 }
 
 template<class Ttype>
-void MyVector<Ttype>::ShrinkToFit() {
-	MyVector tmp(*this);
-	Allocate(Size());
-	CopyElements(tmp);
+void my_vector<Ttype>::shrink_to_fit() {
+	my_vector tmp(*this);
+	allocate(size());
+	copy_elements(tmp);
 }
 
 template<class Ttype>
-inline bool MyVector<Ttype>::Empty() const {
+inline bool my_vector<Ttype>::empty() const {
 	return lbound_ == ubound_;
 }
 
 template<class Ttype>
-inline void MyVector<Ttype>::Clear() {
+inline void my_vector<Ttype>::clear() {
 	ubound_ = lbound_;
 }
 
-template <class Ttype>
-void MyVector<Ttype>::Erase(size_t pos) {
-	if (pos < Size()) {
+template<class Ttype>
+my_vector<Ttype>::template my_iterator my_vector<Ttype>::erase(my_iterator pos) {
+	if (pos < end() && (my_iterator)(begin() - 1) < pos) {
 		--ubound_;
-		for (int i = pos; i < Size(); ++i) {
-			lbound_[i] = lbound_[i + 1];
+		for (auto it = pos; it < end(); ++it) {
+			*it = *(it + 1);
 		}
 	}
+	else {
+		throw std::out_of_range("Iterator Out of Range!!!");
+	}
+	return pos;
 }
 
 template<class Ttype>
-void MyVector<Ttype>::Erase(size_t pos1, size_t pos2) {
-	if (pos1 > pos2) {
-		throw std::exception("pos2 must be >= pos1!!!");
-	}
-	if (pos1 == pos2) {
-		Erase(pos1);
-	}
-	else if (pos2 <= Size()) {
+my_vector<Ttype>::template my_iterator my_vector<Ttype>::erase(my_iterator pos1, my_iterator pos2)
+{
+	if (pos2 - pos1 <= (ptrdiff_t)size() && pos2 < end() + 1 && (my_iterator)(begin() - 1) < pos1) {
 		ubound_ -= (pos2 - pos1);
-		for (int i = pos1; i < Size(); ++i) {
-			lbound_[i] = lbound_[i + pos2 - pos1];
+		for (auto it = pos1; it < end(); ++it) {
+			*it = *(it + (pos2 - pos1));
 		}
 	}
+	else {
+		throw std::out_of_range("Iterator Out of Range!!!");
+	}
+	return pos2;
 }
 
 template <class Ttype>
-void MyVector<Ttype>::Insert(size_t pos, Ttype element)
-{
-	if (pos < size_ + 1)
-	{
-		if (capacity_ < (size_ + 1))
-		{
-			DefaultReserve();
-			++size_;
-			for (int i = (size_ - 1); i > pos; --i)
-			{
-				lbound_[i] = lbound_[i - 1];
-			}
-			lbound_[pos] = element;
+my_vector<Ttype>::template my_iterator my_vector<Ttype>::insert(my_iterator pos, Ttype element) {
+	if ((pos < end() + 1 && (my_iterator)(begin() - 1) < pos) || !capacity()) {
+		if (capacity() < (size() + 1)) {
+			ptrdiff_t p = pos - begin();
+			default_reserve();
+			pos = begin() + p;
 		}
-		else
-		{
-			++size_;
-			for (int i = (size_ - 1); i > pos; --i)
-			{
-				lbound_[i] = lbound_[i - 1];
-			}
-			lbound_[pos] = element;
+		++ubound_;
+		for (auto it = end() - 1; pos < it; --it) {
+			*it = *(it - 1);
 		}
+		*pos = element;
 	}
+	else {
+		throw std::out_of_range("Iterator Out of Range!!!");
+	}
+	return pos;
 }
 
 template<class Ttype>
-void MyVector<Ttype>::Insert(size_t pos, MyVector &vec)
-{
-	if (pos < size_ + 1)
-	{
-		if (capacity_ < (size_ + vec.Size()))
-		{
-			Reserve(vec.Size());
-			size_ += vec.Size();
-			for (int i = (size_ - 1); i > pos; --i)
-			{
-				lbound_[i] = lbound_[i - vec.Size()];
-			}
-			for (int i = pos; i < pos + vec.Size(); ++i)
-			{
-				lbound_[i] = vec[i - pos];
-			}
+my_vector<Ttype>::template my_iterator my_vector<Ttype>::insert(my_iterator pos, my_iterator first, my_iterator last) {
+	if ((pos < end() + 1 && (my_iterator)(begin() - 1) < pos) || !capacity()) {
+		if (capacity() < (size() + (last - first))) {
+			ptrdiff_t p = pos - begin();
+			reserve(size() + (last - first) + 1);
+			pos = begin() + p;
 		}
-		else
-		{
-			size_ += vec.Size();
-			for (int i = (size_ - 1); i > pos; --i)
-			{
-				lbound_[i] = lbound_[i - vec.Size()];
-			}
-			for (int i = pos; i < pos + vec.Size(); ++i)
-			{
-				lbound_[i] = vec[i - pos];
-			}
+
+		ubound_ += (last - first);
+		for (auto it = end() - 1; pos < it; --it) {
+			*it = *(it - (last - first));
+		}
+		
+		int count(0);
+		for (auto it = pos; it < pos + (last - first); ++it, ++count) {
+			*it = *(first + count);
 		}
 	}
+	else {
+		throw std::out_of_range("Iterator Out of Range!!!");
+	}
+	return pos;
 }
 
 template <class Ttype>
-void MyVector<Ttype>::PushBack(Ttype element) {
+void my_vector<Ttype>::push_back(Ttype element) {
 	if (ubound_ == end_) {
-		DefaultReserve();
+		default_reserve();
 	}
-	lbound_[Size()] = element;
-	ubound_ = lbound_ + Size() + 1;
-}
-
-template <class Ttype>
-void MyVector<Ttype>::PushBack(MyVector &vec)
-{
-	Insert(size_, vec);
+	lbound_[size()] = element;
+	ubound_ = lbound_ + size() + 1;
 }
 
 template<class Ttype>
-void MyVector<Ttype>::Swap(MyVector &vec)
-{
-	MyVector tmp(*this);
+void my_vector<Ttype>::swap(my_vector &vec){
+	my_vector tmp(*this);
 	*this = vec;
 	vec = tmp;
 }
 
+template<class Ttype>
+void my_vector<Ttype>::pop_back() {
+	--ubound_;
+}
+
 template <class Ttype>
-Ttype& MyVector<Ttype>::operator[](const size_t i) {
+Ttype& my_vector<Ttype>::operator[](const size_t i) {
 	return lbound_[i];
 }
 
 template <class Ttype>
-MyVector<Ttype>& MyVector<Ttype>::operator=(const MyVector& rh_vec) {
+my_vector<Ttype>& my_vector<Ttype>::operator=(const my_vector& rh_vec) {
 	if (this == &rh_vec) return *this;
-	if (Capacity() < rh_vec.Size()) {
-		Allocate((size_t)(rh_vec.Size() * COEFF_CAPACITY));
+	if (capacity() < rh_vec.size()) {
+		allocate((size_t)(rh_vec.size() * COEFF_CAPACITY));
 	}
-	CopyElements(rh_vec);
+	copy_elements(rh_vec);
 	return *this;
 }
 
 template <class Ttype>
-bool MyVector<Ttype>::operator==(MyVector &vec) {
-	if (Size() != vec.Size()) return false;
-	for (int i = 0; i < Size(); ++i) {
+bool my_vector<Ttype>::operator==(my_vector &vec) {
+	if (size() != vec.size()) return false;
+	for (int i = 0; i < size(); ++i) {
 		if (lbound_[i] != vec[i]) return false;
 	}
 	return true;
 }
 
+template<class Ttype>
+inline bool my_vector<Ttype>::operator!=(my_vector& vec) {
+	return !(*this == vec);
+}
+
+template<class Ttype>
+inline bool my_vector<Ttype>::operator>(my_vector& vec) {
+	return size() > vec.size();
+}
+
+template<class Ttype>
+inline bool my_vector<Ttype>::operator<(my_vector& vec) {
+	return size() < vec.size();
+}
+
+template<class Ttype>
+inline bool my_vector<Ttype>::operator>=(my_vector& vec) {
+	return size() >= vec.size();
+}
+
+template<class Ttype>
+inline bool my_vector<Ttype>::operator<=(my_vector& vec) {
+	return size() <= vec.size();
+}
+
 template <class Ttype>
-MyVector<Ttype>::~MyVector() {
-	Deallocate();
+my_vector<Ttype>::~my_vector() {
+	deallocate();
+}
+
+// Iterator methods
+template<class Ttype>
+inline Ttype * my_vector<Ttype>::my_iterator::operator++() {
+	return ++ptr_;
+}
+
+template<class Ttype>
+inline Ttype* my_vector<Ttype>::my_iterator::operator--() {
+	return --ptr_;
+}
+
+template<class Ttype>
+inline Ttype* my_vector<Ttype>::my_iterator::operator+(size_t num) {
+	return ptr_ + num;
+}
+
+template<class Ttype>
+inline Ttype* my_vector<Ttype>::my_iterator::operator-(size_t num) {
+	return ptr_ - num;
+}
+
+template<class Ttype>
+inline ptrdiff_t my_vector<Ttype>::my_iterator::operator-(my_iterator rh_itr) {
+	return ptr_ - rh_itr.ptr_;
+}
+
+template<class Ttype>
+inline Ttype& my_vector<Ttype>::my_iterator::operator*() {
+	return *ptr_;
+}
+
+template<class Ttype>
+inline bool my_vector<Ttype>::my_iterator::operator==(my_iterator itr) {
+	return itr.ptr_ == ptr_;
+}
+
+template<class Ttype>
+inline bool my_vector<Ttype>::my_iterator::operator!=(my_iterator itr) {
+	return itr.ptr_ != ptr_;
+}
+
+template<class Ttype>
+inline bool my_vector<Ttype>::my_iterator::operator<(my_iterator itr) {
+	return ptr_ < itr.ptr_;
+}
+
+
+// additional function non-members
+template <class Ttype>
+void rand_int_init(my_vector<Ttype>& v, int rand_range) {
+	for (int i = 0; i < v.size(); ++i) {
+		v[i] = rand() % rand_range;
+	}
+}
+
+template <class Ttype>
+void rand_int_init(my_vector<Ttype>& v, int l_rand_range, int u_rand_range) {
+	for (int i = 0; i < v.size(); ++i) {
+		v[i] = rand() % (u_rand_range - l_rand_range) + l_rand_range;
+	}
 }

@@ -2,83 +2,61 @@
 #include <vector>
 #include <math.h>
 #include <time.h>
+#include <algorithm>
 #include "MyVector.h"
-
 using namespace std;
 
-int main()
-{
-	/*vector<int> v(3);
-	cout << "capacity - " << v.capacity() << "\tsize - " << v.size() << endl;
-
-	v.reserve(100);
-	v.reserve(101);
-	cout << "capacity - " << v.capacity() << "\tsize - " << v.size() << endl;
-
-	vector<int> f(15, 1);
-	cout << "Before assignment:" << endl;
-	cout << "capacity - " << f.capacity() << "\tsize - " << f.size() << endl;
-
-	for (int i = 0; i < f.size(); ++i) {
-		cout << f.at(i) << endl;
+template <class Ttype>
+void rand_int_init(vector<Ttype>& v, int rand_range) {
+	for (int i = 0; i < v.size(); ++i) {
+		v[i] = rand() % rand_range;
 	}
+}
 
-	f = v;
-	cout << "After assignment:" << endl;
-	cout << "capacity - " << f.capacity() << "\tsize - " << f.size() << endl;
-	for (int i = 0; i < f.size(); ++i) {
-		cout << f.at(i) << endl;
-	}*/
+template <class Ttype>
+void rand_int_init(vector<Ttype>& v, int l_rand_range, int u_rand_range) {
+	for (int i = 0; i < v.size(); ++i) {
+		v[i] = rand() % (u_rand_range - l_rand_range) + l_rand_range;
+	}
+}
+
+template <class Conteiner>
+void print(Conteiner& c) {
+	for (const auto& el : c) {
+		cout << el << ' ';
+	}
+	cout << endl;
+}
+
+
+int main() {
 	
-	MyVector<int> vv;
-	cout << "size - " << vv.Size() << "\tcapacity - " << vv.Capacity() << endl;
-	cout << "push back:" << endl;
-	for (int i = 0; i < 10; ++i) {
-		vv.PushBack(i);
-		cout << "size - " << vv.Size() << "\tcapacity - " << vv.Capacity() << endl;
+	cout << "My vector push_back time test:" << endl;
+	for (int c = 0; c < 5; ++c) {
+		unsigned s = clock();
+		my_vector<int> v;
+		v.reserve(600000000);
+		for (int i = 0; i < 600000000; ++i) {
+			v.push_back(i);
+		}
+		unsigned f = clock();
+		cout << (double)(f - s) / 1000 << endl;
 	}
-	vv[1] = 2;
-	for (int i = 0; i < vv.Size(); ++i) {
-		cout << vv[i] << ", ";
-	}
-	cout << endl;
-	vv.Resize(15);
-	cout << "After resize1:" << endl;
-	for (int i = 0; i < vv.Size(); ++i) {
-		cout << vv[i] << ", ";
-	}
-	cout << endl;
 
-	vv.Resize(5);
-	cout << "After resize2:" << endl;
-	for (int i = 0; i < vv.Size(); ++i) {
-		cout << vv[i] << ", ";
+	cout << "STL vector push_back time test:" << endl;
+	for (int c = 0; c < 5; ++c) {
+		unsigned s = clock();
+		vector<int> v;
+		v.reserve(600000000);
+		for (int i = 0; i < 600000000; ++i) {
+			v.push_back(i);
+		}
+		unsigned f = clock();
+		cout << (double)(f - s) / 1000 << endl;
 	}
-	cout << endl;
-
-	vv.PushBack(12);
-	cout << "After PushBack:" << endl;
-	for (int i = 0; i < vv.Size(); ++i) {
-		cout << vv[i] << ", ";
-	}
-	cout << endl;
-	cout << "size - " << vv.Size() << "\tcapacity - " << vv.Capacity() << endl;
-
-	vv.ShrinkToFit();
-	cout << "After ShrinkToFit:" << endl;
-	for (int i = 0; i < vv.Size(); ++i) {
-		cout << vv[i] << ", ";
-	}
-	cout << endl;
-	cout << "size - " << vv.Size() << "\tcapacity - " << vv.Capacity() << endl;
-
-	vv.Erase(4, 7);
-	cout << "After Erase:" << endl;
-	for (int i = 0; i < vv.Size(); ++i) {
-		cout << vv[i] << ", ";
-	}
-	cout << endl;
-	cout << "size - " << vv.Size() << "\tcapacity - " << vv.Capacity() << endl;
 	system("pause");
 	return 0;
 }
+
+
+
