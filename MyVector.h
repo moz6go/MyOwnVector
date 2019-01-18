@@ -4,7 +4,6 @@
 // Date: 12/06/2018
 
 #pragma once
-#include <cstdlib>
 
 template <class Ttype>
 class my_vector {
@@ -22,6 +21,7 @@ public:
 	my_vector();
 	my_vector(const my_vector &vec);
 	my_vector(size_t s, Ttype element = Ttype());
+    ~my_vector();
 	Ttype at(const size_t pos) const;
 	Ttype front() const;
 	Ttype back() const;
@@ -49,17 +49,17 @@ public:
 	bool operator <(my_vector &vec);
 	bool operator >=(my_vector &vec);
 	bool operator <=(my_vector &vec);
-	~my_vector();
-	class my_iterator
+
+    class my_iterator
 	{
 		Ttype* ptr_;
 	public:
 		my_iterator(Ttype* ptr = nullptr) : ptr_(ptr) {}
-		Ttype* operator++();
-		Ttype* operator--();
-		Ttype* operator+(size_t num);
-		Ttype* operator-(size_t num);
-		ptrdiff_t operator-(my_iterator rh_itr);
+        my_iterator operator++();
+        my_iterator operator--();
+        my_iterator operator+(size_t num);
+        my_iterator operator-(size_t num);
+        std::ptrdiff_t operator-(my_iterator rh_itr);
 		Ttype& operator* ();
 		bool operator==(my_iterator itr);
 		bool operator!=(my_iterator itr);
@@ -67,7 +67,7 @@ public:
 	};
 };
 
-//Privat methods for alloc
+//Private methods for alloc
 template <class Ttype>
 void my_vector<Ttype>::copy_elements(const my_vector &source) {
 	for (size_t i = 0; i < source.size(); ++i) {
@@ -85,7 +85,7 @@ void my_vector<Ttype>::allocate(const size_t new_capacity) {
 
 template <class Ttype>
 void my_vector<Ttype>::deallocate() {
-	if (lbound_) {
+    if (lbound_) {
 		delete[] lbound_;
 		lbound_ = ubound_ = end_ = nullptr;
 	}
@@ -103,20 +103,18 @@ void my_vector<Ttype>::default_reserve() {
 	}
 }
 
-//Methods implementation
+//C-tors, D-tor
 template <class Ttype>
-my_vector<Ttype>::my_vector() {
-	lbound_ = ubound_ = end_ = nullptr;
-}
+my_vector<Ttype>::my_vector() :lbound_(nullptr), ubound_(nullptr), end_(nullptr) {}
 
 template <class Ttype>
-my_vector<Ttype>::my_vector(const my_vector &vec) {
+my_vector<Ttype>::my_vector(const my_vector &vec) :lbound_(nullptr), ubound_(nullptr), end_(nullptr) {
 	allocate(vec.capacity());
 	copy_elements(vec);
 }
 
 template <class Ttype>
-my_vector<Ttype>::my_vector(size_t s, Ttype element) {
+my_vector<Ttype>::my_vector(size_t s, Ttype element) :lbound_(nullptr), ubound_(nullptr), end_(nullptr) {
 	if (s) {
 		allocate((size_t)(s * COEFF_CAPACITY));
 		ubound_ = lbound_ + s;
@@ -124,11 +122,14 @@ my_vector<Ttype>::my_vector(size_t s, Ttype element) {
 			lbound_[i] = element;
 		}
 	}
-	else {
-		lbound_ = ubound_ = end_ = nullptr;
-	}
 }
 
+template <class Ttype>
+my_vector<Ttype>::~my_vector() {
+    deallocate();
+}
+
+//Methods implementation
 template <class Ttype>
 Ttype my_vector<Ttype>::at(const size_t pos) const {
 	if (pos > size()) {
@@ -148,12 +149,12 @@ inline Ttype my_vector<Ttype>::back() const {
 }
 
 template<class Ttype>
-inline my_vector<Ttype>::template my_iterator my_vector<Ttype>::begin() {
+inline typename my_vector<Ttype>::my_iterator my_vector<Ttype>::begin() {
 	return lbound_;
 }
 
 template<class Ttype>
-inline  my_vector<Ttype>::template my_iterator my_vector<Ttype>::end() {
+inline typename my_vector<Ttype>::my_iterator my_vector<Ttype>::end() {
 	return ubound_;
 }
 
@@ -206,8 +207,8 @@ inline void my_vector<Ttype>::clear() {
 }
 
 template<class Ttype>
-my_vector<Ttype>::template my_iterator my_vector<Ttype>::erase(my_iterator pos) {
-	if (pos < end() && (my_iterator)(begin() - 1) < pos) {
+typename my_vector<Ttype>::my_iterator my_vector<Ttype>::erase(my_iterator pos) {
+    if (pos < end() && (my_iterator)(begin() - 1) < pos) {
 		--ubound_;
 		for (auto it = pos; it < end(); ++it) {
 			*it = *(it + 1);
@@ -220,9 +221,9 @@ my_vector<Ttype>::template my_iterator my_vector<Ttype>::erase(my_iterator pos) 
 }
 
 template<class Ttype>
-my_vector<Ttype>::template my_iterator my_vector<Ttype>::erase(my_iterator pos1, my_iterator pos2)
+typename my_vector<Ttype>::my_iterator my_vector<Ttype>::erase(my_iterator pos1, my_iterator pos2)
 {
-	if (pos2 - pos1 <= (ptrdiff_t)size() && pos2 < end() + 1 && (my_iterator)(begin() - 1) < pos1) {
+    if (pos2 - pos1 <= (std::ptrdiff_t)size() && pos2 < end() + 1 && (my_iterator)(begin() - 1) < pos1) {
 		ubound_ -= (pos2 - pos1);
 		for (auto it = pos1; it < end(); ++it) {
 			*it = *(it + (pos2 - pos1));
@@ -235,10 +236,10 @@ my_vector<Ttype>::template my_iterator my_vector<Ttype>::erase(my_iterator pos1,
 }
 
 template <class Ttype>
-my_vector<Ttype>::template my_iterator my_vector<Ttype>::insert(my_iterator pos, Ttype element) {
+typename my_vector<Ttype>::my_iterator my_vector<Ttype>::insert(my_iterator pos, Ttype element) {
 	if ((pos < end() + 1 && (my_iterator)(begin() - 1) < pos) || !capacity()) {
 		if (capacity() < (size() + 1)) {
-			ptrdiff_t p = pos - begin();
+            std::ptrdiff_t p = pos - begin();
 			default_reserve();
 			pos = begin() + p;
 		}
@@ -255,10 +256,10 @@ my_vector<Ttype>::template my_iterator my_vector<Ttype>::insert(my_iterator pos,
 }
 
 template<class Ttype>
-my_vector<Ttype>::template my_iterator my_vector<Ttype>::insert(my_iterator pos, my_iterator first, my_iterator last) {
+typename my_vector<Ttype>::my_iterator my_vector<Ttype>::insert(my_iterator pos, my_iterator first, my_iterator last) {
 	if ((pos < end() + 1 && (my_iterator)(begin() - 1) < pos) || !capacity()) {
 		if (capacity() < (size() + (last - first))) {
-			ptrdiff_t p = pos - begin();
+            std::ptrdiff_t p = pos - begin();
 			reserve(size() + (last - first) + 1);
 			pos = begin() + p;
 		}
@@ -349,34 +350,29 @@ inline bool my_vector<Ttype>::operator<=(my_vector& vec) {
 	return size() <= vec.size();
 }
 
-template <class Ttype>
-my_vector<Ttype>::~my_vector() {
-	deallocate();
-}
-
 // Iterator methods
 template<class Ttype>
-inline Ttype * my_vector<Ttype>::my_iterator::operator++() {
+inline typename my_vector<Ttype>::my_iterator my_vector<Ttype>::my_iterator::operator++() {
 	return ++ptr_;
 }
 
 template<class Ttype>
-inline Ttype* my_vector<Ttype>::my_iterator::operator--() {
+inline typename my_vector<Ttype>::my_iterator my_vector<Ttype>::my_iterator::operator--() {
 	return --ptr_;
 }
 
 template<class Ttype>
-inline Ttype* my_vector<Ttype>::my_iterator::operator+(size_t num) {
+inline typename my_vector<Ttype>::my_iterator my_vector<Ttype>::my_iterator::operator+(size_t num) {
 	return ptr_ + num;
 }
 
 template<class Ttype>
-inline Ttype* my_vector<Ttype>::my_iterator::operator-(size_t num) {
+inline typename my_vector<Ttype>::my_iterator my_vector<Ttype>::my_iterator::operator-(size_t num) {
 	return ptr_ - num;
 }
 
 template<class Ttype>
-inline ptrdiff_t my_vector<Ttype>::my_iterator::operator-(my_iterator rh_itr) {
+inline std::ptrdiff_t my_vector<Ttype>::my_iterator::operator-(my_iterator rh_itr) {
 	return ptr_ - rh_itr.ptr_;
 }
 
@@ -398,20 +394,4 @@ inline bool my_vector<Ttype>::my_iterator::operator!=(my_iterator itr) {
 template<class Ttype>
 inline bool my_vector<Ttype>::my_iterator::operator<(my_iterator itr) {
 	return ptr_ < itr.ptr_;
-}
-
-
-// additional function non-members
-template <class Ttype>
-void rand_int_init(my_vector<Ttype>& v, int rand_range) {
-	for (int i = 0; i < v.size(); ++i) {
-		v[i] = rand() % rand_range;
-	}
-}
-
-template <class Ttype>
-void rand_int_init(my_vector<Ttype>& v, int l_rand_range, int u_rand_range) {
-	for (int i = 0; i < v.size(); ++i) {
-		v[i] = rand() % (u_rand_range - l_rand_range) + l_rand_range;
-	}
 }
